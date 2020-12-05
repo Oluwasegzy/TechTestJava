@@ -9,12 +9,18 @@ public class OrderService {
 
     private OrderRepository orderRepository = new OrderRepository();
 
-    public boolean placeOrder(Order order, int customerId)
+    public void placeOrder(Order order, long customerId) throws Exception
     {
-        Customer customer = CustomerRepository.load(customerId);
-
+        if (order.getOrderId() == 0) {
+            throw new Exception("order id is mandatory");
+        }
+        Customer customer = CustomerRepository.load(customerId, true);
+        if (customer.getCustomerId() == 0) {
+            throw new Exception("customer id is mandatory");
+        }
+        order.setCustomerId(customer.getCustomerId());
         if (order.getAmount() == 0)
-            return false;
+            throw new Exception("valid amount is required");
 
         if (customer.getCountry() == "UK")
             order.setVAT(0.2d);
@@ -22,7 +28,5 @@ public class OrderService {
             order.setVAT(0);
 
         orderRepository.save(order);
-
-        return true;
     }
 }

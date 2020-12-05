@@ -4,12 +4,8 @@ import za.co.anycompany.model.Order;
 
 import java.sql.*;
 
-public class OrderRepository {
+public class OrderRepository extends BaseRepository{
 
-    private static final String DB_DRIVER = "org.h2.Driver";
-    private static final String DB_CONNECTION = "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1";
-    private static final String DB_USER = "";
-    private static final String DB_PASSWORD = "";
 
     public void save(Order order) {
         Connection connection = getDBConnection();
@@ -18,14 +14,17 @@ public class OrderRepository {
 
         try {
             statement = connection.createStatement();
-            statement.executeUpdate("CREATE TABLE ORDER (oderId int primary key not null, amount number(10,2), vat number (3,1))");
-            connection.prepareStatement("INSERT INTO ORDER(oderId, amount, vat) VALUES(?,?,?)");
-            preparedStatement.setInt(1, order.getOrderId());
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS CUSTOMER (customer_Id bigint primary key not null, name varchar(120), country varchar(120), date_of_birth date)");
+            statement.executeUpdate("CREATE TABLE IF NOT EXISTS `ORDER` (order_Id int primary key not null, amount decimal(10,2), vat decimal(3,1), customer_id bigint)");
+            preparedStatement = connection.prepareStatement("INSERT INTO `ORDER` (order_Id, amount, vat, customer_id) VALUES(?,?,?,?)");
+            preparedStatement.setLong(1, order.getOrderId());
             preparedStatement.setDouble(2, order.getAmount());
             preparedStatement.setDouble(3, order.getVAT());
+            preparedStatement.setDouble(4, order.getCustomerId());
             preparedStatement.executeUpdate();
 
         } catch (SQLException e) {
+            System.out.println(e.getMessage());
 
         } finally {
             try {
@@ -38,19 +37,4 @@ public class OrderRepository {
         }
     }
 
-    private static Connection getDBConnection() {
-        Connection dbConnection = null;
-        try {
-            Class.forName(DB_DRIVER);
-        } catch (ClassNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
-        try {
-            dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
-            return dbConnection;
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return dbConnection;
-    }
 }
