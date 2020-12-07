@@ -1,3 +1,7 @@
 out/
 .idea/
 TechTestJava2.iml
+TechTestJava.iml
+target/
+*.class
+*.jar
